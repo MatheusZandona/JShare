@@ -464,7 +464,7 @@ public class Principal extends JFrame implements IServer{
 		
 		return dados;
 	}
-
+  
 	@Override
 	public void desconectar(Cliente c) throws RemoteException {
 		clientes.remove(c);
