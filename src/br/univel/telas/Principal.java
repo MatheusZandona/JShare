@@ -1,23 +1,14 @@
 package br.univel.telas;
 
-import javax.swing.JFrame;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-
-import br.univel.classes.ExecutaServidorCliente;
-import br.univel.classes.LeituraEscritaDeArquivos;
-import br.univel.classes.LerIp;
-import br.univel.classes.ListarDiretoriosArquivos;
-import br.univel.classes.ModelArquivos;
-import br.univel.jshare.comum.Arquivo;
-import br.univel.jshare.comum.Cliente;
-import br.univel.jshare.comum.IServer;
-import br.univel.jshare.comum.TipoFiltro;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -28,21 +19,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
 
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.table.DefaultTableModel;
-import java.awt.Font;
 import javax.swing.SwingConstants;
-import javax.swing.JRadioButton;
+
+import br.univel.classes.LeituraEscritaDeArquivos;
+import br.univel.classes.LerIp;
+import br.univel.classes.ListarDiretoriosArquivos;
+import br.univel.classes.ModelArquivos;
+import br.univel.jshare.comum.Arquivo;
+import br.univel.jshare.comum.Cliente;
+import br.univel.jshare.comum.IServer;
+import br.univel.jshare.comum.TipoFiltro;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 
 public class Principal extends JFrame implements IServer{
 	
@@ -50,6 +52,7 @@ public class Principal extends JFrame implements IServer{
 	public List<Cliente> clientes = new ArrayList<>();
 	public static HashMap<Cliente, List<Arquivo>> mapArquivos = new HashMap<>();
 	public static IServer serverCli ;
+	public Cliente cLocal;
 	
 	private JTextField txtPorta;
 	private JTextField txtIp;
@@ -61,14 +64,16 @@ public class Principal extends JFrame implements IServer{
 	JRadioButton rbNome;
 	JRadioButton rbTamMax;
 	JRadioButton rbTamMin;
-	
+	JButton btnConectaServidor;
+	JButton btnDesconectar;
+	JButton btnPesq;
 	
 	public Principal() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{244, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[]{88, 0, 0};
+		gridBagLayout.rowHeights = new int[]{227, 221, 0};
+		gridBagLayout.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
 		getContentPane().setLayout(gridBagLayout);
 		
 		JPanel panelCliente = new JPanel();
@@ -80,7 +85,7 @@ public class Principal extends JFrame implements IServer{
 		getContentPane().add(panelCliente, gbc_panelCliente);
 		GridBagLayout gbl_panelCliente = new GridBagLayout();
 		gbl_panelCliente.columnWidths = new int[]{0, 0, 0};
-		gbl_panelCliente.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_panelCliente.rowHeights = new int[]{0, 0, 194, 24, 0};
 		gbl_panelCliente.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
 		gbl_panelCliente.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panelCliente.setLayout(gbl_panelCliente);
@@ -94,9 +99,9 @@ public class Principal extends JFrame implements IServer{
 		panelCliente.add(lblIp, gbc_lblIp);
 		
 		txtIp = new JTextField();
-		txtIp.setText("127.0.0.1");
+		txtIp.setText(LerIp.ler());
 		GridBagConstraints gbc_txtIp = new GridBagConstraints();
-		gbc_txtIp.insets = new Insets(0, 0, 5, 0);
+		gbc_txtIp.insets = new Insets(0, 0, 5, 5);
 		gbc_txtIp.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtIp.gridx = 1;
 		gbc_txtIp.gridy = 0;
@@ -115,24 +120,22 @@ public class Principal extends JFrame implements IServer{
 		txtPorta = new JTextField();
 		txtPorta.setText("1818");
 		GridBagConstraints gbc_txtPorta = new GridBagConstraints();
-		gbc_txtPorta.insets = new Insets(0, 0, 5, 0);
+		gbc_txtPorta.insets = new Insets(0, 0, 5, 5);
 		gbc_txtPorta.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtPorta.gridx = 1;
 		gbc_txtPorta.gridy = 1;
 		panelCliente.add(txtPorta, gbc_txtPorta);
 		txtPorta.setColumns(10);
 		
-		JButton btnConectaServidor = new JButton("Conectar Servidor");
+		btnConectaServidor = new JButton("Conectar Servidor");
 		btnConectaServidor.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				executar();
-			}
-		});
-		btnConectaServidor.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				conectarServidor(txtIp.getText(), Integer.parseInt(txtPorta.getText()));
-//				executar();
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					conectarServidor(txtIp.getText(), Integer.parseInt(txtPorta.getText()));
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 		
@@ -154,16 +157,21 @@ public class Principal extends JFrame implements IServer{
 		gbc_btnConectaServidor.gridy = 3;
 		panelCliente.add(btnConectaServidor, gbc_btnConectaServidor);
 		
-		JButton btnNewButton = new JButton("Desconectar");
-		btnNewButton.addActionListener(new ActionListener() {
+		btnDesconectar = new JButton("Desconectar");
+		btnDesconectar.setEnabled(false);
+		btnDesconectar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				desconectar(c);
+				try {
+					desconectar(cLocal);
+				} catch (RemoteException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.gridx = 1;
-		gbc_btnNewButton.gridy = 3;
-		panelCliente.add(btnNewButton, gbc_btnNewButton);
+		GridBagConstraints gbc_btnDesconectar = new GridBagConstraints();
+		gbc_btnDesconectar.gridx = 1;
+		gbc_btnDesconectar.gridy = 3;
+		panelCliente.add(btnDesconectar, gbc_btnDesconectar);
 		
 		JPanel panelServidor = new JPanel();
 		GridBagConstraints gbc_panelServidor = new GridBagConstraints();
@@ -174,9 +182,9 @@ public class Principal extends JFrame implements IServer{
 		getContentPane().add(panelServidor, gbc_panelServidor);
 		GridBagLayout gbl_panelServidor = new GridBagLayout();
 		gbl_panelServidor.columnWidths = new int[]{0, 0};
-		gbl_panelServidor.rowHeights = new int[]{0, 0, 0};
+		gbl_panelServidor.rowHeights = new int[]{51, 167, 15, 0};
 		gbl_panelServidor.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_panelServidor.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		gbl_panelServidor.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panelServidor.setLayout(gbl_panelServidor);
 		
 		JButton btnIniciarServidor = new JButton("Iniciar Servidor");
@@ -193,12 +201,15 @@ public class Principal extends JFrame implements IServer{
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
+		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridx = 0;
 		gbc_scrollPane_1.gridy = 1;
 		panelServidor.add(scrollPane_1, gbc_scrollPane_1);
 		
 		txtPaneLogServidor = new JTextPane();
+		txtPaneLogServidor.setFont(new Font("Arial", Font.BOLD, 14));
+		txtPaneLogServidor.setMargin(new Insets(3, 3, 0, 3));
 		scrollPane_1.setViewportView(txtPaneLogServidor);
 		txtPaneLogServidor.setEditable(false);
 		
@@ -275,6 +286,30 @@ public class Principal extends JFrame implements IServer{
 		panelTabela.add(lblArquivosDisponveis, gbc_lblArquivosDisponveis);
 		
 		txtPesq = new JTextField();
+		txtPesq.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				HashMap<Cliente, List<Arquivo>> mapPesq = new HashMap<>();
+				try {
+					if(rbNome.isSelected()){
+						mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo(txtPesq.getText(), TipoFiltro.NOME, "");
+					}else{
+						if(rbExtensao.isSelected()){
+							mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.EXTENSAO, txtPesq.getText());
+						}else{
+							if(rbTamMax.isSelected()){
+								mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.TAMANHO_MAX, txtPesq.getText());
+							}else{
+								mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.TAMANHO_MIN, txtPesq.getText());
+							}
+						}
+					}
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				atualizaTable(mapPesq);
+			}
+		});
 		GridBagConstraints gbc_txtPesq = new GridBagConstraints();
 		gbc_txtPesq.insets = new Insets(0, 0, 5, 5);
 		gbc_txtPesq.fill = GridBagConstraints.HORIZONTAL;
@@ -283,11 +318,31 @@ public class Principal extends JFrame implements IServer{
 		panelTabela.add(txtPesq, gbc_txtPesq);
 		txtPesq.setColumns(10);
 		
-		JButton btnPesq = new JButton("Pesq");
+		btnPesq = new JButton("Pesq");
+		btnPesq.setEnabled(false);
 		btnPesq.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				atualizarMapArquivos();
-				carregar();
+//				atualizarMapArquivos();
+//				atualizaTable();
+				HashMap<Cliente, List<Arquivo>> mapPesq = new HashMap<>();
+				try {
+					if(rbNome.isSelected()){
+						mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo(txtPesq.getText(), TipoFiltro.NOME, "");
+					}else{
+						if(rbExtensao.isSelected()){
+							mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.EXTENSAO, txtPesq.getText());
+						}else{
+							if(rbTamMax.isSelected()){
+								mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.TAMANHO_MAX, txtPesq.getText());
+							}else{
+								mapPesq = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.TAMANHO_MIN, txtPesq.getText());
+							}
+						}
+					}
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				atualizaTable(mapPesq);
 			}
 		});
 		GridBagConstraints gbc_btnPesq = new GridBagConstraints();
@@ -310,14 +365,20 @@ public class Principal extends JFrame implements IServer{
 		
 		scrollPane.setViewportView(tableArquivos);
 		
-		JButton btnDownload = new JButton("Download");
+		JButton btnDownload = new JButton("Efetuar Download");
+		btnDownload.setMinimumSize(new Dimension(400, 23));
+		btnDownload.setMaximumSize(new Dimension(400, 23));
+		btnDownload.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		btnDownload.setBackground(Color.green);  
+		btnDownload.setForeground(Color.BLACK); 
 		btnDownload.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				efetuarDownload();
 			}
 		});
 		GridBagConstraints gbc_btnDownload = new GridBagConstraints();
-		gbc_btnDownload.gridx = 1;
+		gbc_btnDownload.insets = new Insets(0, 0, 0, 5);
+		gbc_btnDownload.gridx = 0;
 		gbc_btnDownload.gridy = 4;
 		panelTabela.add(btnDownload, gbc_btnDownload);
 	}
@@ -326,17 +387,15 @@ public class Principal extends JFrame implements IServer{
 	public static void main(String[] args) {
 		
 		Principal p = new Principal();
-		p.setSize(493,395);
+		p.setSize(1500,700);
 		p.setVisible(true);
 		p.setLocationRelativeTo(null);
-		
 		
 	}
 
 
 	public void executar() {
-		
-		carregar();
+		atualizaTable(mapArquivos);
 		
 	}
 
@@ -360,29 +419,30 @@ public class Principal extends JFrame implements IServer{
 		}
 	}
 	
-	public void conectarServidor(String ip, int porta) {
-		Cliente c1 = new Cliente();
-		c1.setId(1);
-		c1.setIp(LerIp.ler());
-		c1.setNome("Matheus");
-		c1.setPorta(1818);
+	public void conectarServidor(String ip, int porta) throws Exception {
+		cLocal = new Cliente();
+		cLocal.setId(1);
+		cLocal.setIp(LerIp.ler());
+		cLocal.setNome("Zandoná");
+		cLocal.setPorta(1818);
 		
 		List<Arquivo> arquivos = new ArrayList<>();
 		arquivos = ListarDiretoriosArquivos.listar(new File("Share\\Uploads"));
 		
 		Registry registry;
-		try {
-			mostrarMensagemCliente("Conectando no servidor...");
-			registry =  LocateRegistry.getRegistry(ip, porta);
-			server = (IServer) registry.lookup(IServer.NOME_SERVICO);
-			mostrarMensagemCliente("Servidor conectado.");
+		mostrarMensagemCliente("Conectando no servidor...");
+		registry =  LocateRegistry.getRegistry(ip, porta);
+		server = (IServer) registry.lookup(IServer.NOME_SERVICO);
+		mostrarMensagemCliente("Você esta conectado.");
 			
-			System.out.println(c1.getIp()+" - "+c1.getNome());
-			server.registrarCliente(c1);
-			server.publicarListaArquivos(c1, arquivos);
-		} catch (Exception e) {
 			
-		}
+		server.registrarCliente(cLocal);
+		server.publicarListaArquivos(cLocal, arquivos);
+		
+		btnConectaServidor.setEnabled(false);
+		btnDesconectar.setEnabled(true);
+		btnPesq.setEnabled(true);
+		atualizaTable(mapArquivos);
 	}
 
 	@Override
@@ -394,11 +454,14 @@ public class Principal extends JFrame implements IServer{
 	@Override
 	public void publicarListaArquivos(Cliente c, List<Arquivo> lista) throws RemoteException {
 		mapArquivos.put(c, lista);
-		mostrarMensagemServidor("Cliente "+c.getIp() + " publicou.");
+		mostrarMensagemServidor("Cliente "+c.getIp() + " - " + c.getNome() + " publicou arquivo(s).");
 	}
 
 	@Override
 	public Map<Cliente, List<Arquivo>> procurarArquivo(String query, TipoFiltro tipoFiltro, String filtro) throws RemoteException {
+		query = query.toUpperCase();
+		filtro = filtro.toUpperCase();
+		
 		HashMap<Cliente, List<Arquivo>> mapa = new HashMap<>();
 		
 		Set<Cliente> chaves = mapArquivos.keySet();
@@ -414,40 +477,37 @@ public class Principal extends JFrame implements IServer{
 //						arquivosEncontrados.add(arquivo);
 //					}
 					
-					switch(tipoFiltro){
-						case NOME:
-							if(arquivo.getNome().toUpperCase().contains(filtro) || query.isEmpty()){
+					if(TipoFiltro.NOME == tipoFiltro){
+						if(arquivo.getNome().toUpperCase().contains(query) || query.isEmpty()){
+							arquivosEncontrados.add(arquivo);
+						}
+					}else{
+						if(TipoFiltro.EXTENSAO == tipoFiltro){
+							if(arquivo.getExtensao().toUpperCase().contains(filtro) || filtro.isEmpty()){
 								arquivosEncontrados.add(arquivo);
-								break;
 							}
-						case EXTENSAO:
-							if(arquivo.getExtensao().toUpperCase().contains(filtro) || query.isEmpty()){
-								arquivosEncontrados.add(arquivo);
-								break;
-							}
-						case TAMANHO_MAX:
-							int tamMax = 0;
-							if(tipoFiltro == TipoFiltro.TAMANHO_MAX){
+						}else{
+							if(TipoFiltro.TAMANHO_MAX == tipoFiltro){
+								int tamMax = 0;
 								tamMax = Integer.parseInt(filtro);
+								if (arquivo.getTamanho() <= tamMax || filtro.isEmpty()) {
+									arquivosEncontrados.add(arquivo);
+								}
+							}else{
+								if(tipoFiltro == TipoFiltro.TAMANHO_MIN){
+									int tamMin = 0;
+									tamMin = Integer.parseInt(filtro);
+									if (arquivo.getTamanho() >= tamMin || filtro.isEmpty()) {
+										arquivosEncontrados.add(arquivo);
+									}
+								}
 							}
-							if (arquivo.getTamanho() <= tamMax) {
-								arquivosEncontrados.add(arquivo);
-								break;
-							}
-						case TAMANHO_MIN:
-							int tamMin = 0;
-							if(tipoFiltro == TipoFiltro.TAMANHO_MIN){
-								tamMin = Integer.parseInt(filtro);
-							}
-							if (arquivo.getTamanho() >= tamMin ) {
-								arquivosEncontrados.add(arquivo);
-								break;
-							}
-						default:
+						}
 					}
-					
 				}
-				mapa.put(cliente, arquivosEncontrados);
+				if(arquivosEncontrados.size() > 0){
+					mapa.put(cliente, arquivosEncontrados);
+				}
 			}			
 		}
 		
@@ -462,61 +522,34 @@ public class Principal extends JFrame implements IServer{
 		LeituraEscritaDeArquivos le = new LeituraEscritaDeArquivos();
 		dados = le.leia(new File(arq.getPath()));
 		
+		mostrarMensagemServidor("Cliente "+cLocal.getIp() + " - " + cLocal.getNome() + " fez download do arquivo " 
+				+ arq.getNome() + "." + arq.getExtensao());
+		
 		return dados;
 	}
   
 	@Override
 	public void desconectar(Cliente c) throws RemoteException {
-		clientes.remove(c);
-		mostrarMensagemServidor("Cliente "+c.getIp() + " - " + c.getNome() + " se desconectou do servidor.");	
+		if(c != null){
+			mapArquivos.remove(c);
+			mostrarMensagemServidor("Cliente "+c.getIp() + " - " + c.getNome() + " se desconectou do servidor.");
+			mostrarMensagemCliente("Você se desconectou.");
+			btnDesconectar.setEnabled(false);
+			btnConectaServidor.setEnabled(true);
+			btnPesq.setEnabled(false);
+			atualizaTable(mapArquivos);
+		}else{
+			mostrarMensagemServidor("Impossivel desconctar cliente null.");
+			mostrarMensagemCliente("Não foi possivel se desconectar.");
+		}
 	}
 	
-	protected void carregar() {
+	protected void atualizaTable(Map<Cliente, List<Arquivo>> dados) {
 //		Map<Cliente, List<Arquivo>> dados = gerarDados();
-		
-		ModelArquivos modelo = new ModelArquivos(mapArquivos);
-		
+		ModelArquivos modelo ;
+		modelo = new ModelArquivos(dados);
 		tableArquivos.setModel(modelo);
 		
-	}
-
-	private Map<Cliente, List<Arquivo>> gerarDados() {
-
-		Map<Cliente, List<Arquivo>> dados = new HashMap<>();
-		
-		for (int c = 1; c <= 10; c++) {
-			
-			Cliente cli = new Cliente();
-			cli.setId(c);
-			cli.setNome("Cliente " + c);
-			cli.setIp(LerIp.ler());
-			cli.setPorta(1818);
-			
-			
-			
-//			Cliente c1 = new Cliente();
-//			c1.setId(1);
-//			c1.setIp(LerIp.ler());
-//			c1.setNome("Matheus");
-//			c1.setPorta(1818);
-			
-			List<Arquivo> lista = new ArrayList<>();
-			for (int a = 1; a <= 20; a++) {
-				//Arquivo para baixar // simulando o selecionar na grid para buscar o arquivo
-				Arquivo a1 = new Arquivo();
-				a1.setNome("Arquivo " + a);
-				a1.setExtensao("txt");
-				a1.setTamanho(1);
-				a1.setId(1);
-				a1.setPath("C:\\eclipse neon\\Workspace\\Projeto Compartilha Arquivos\\Share\\Uploads");
-				
-				lista.add(a1);
-			}
-			
-			dados.put(cli, lista);
-		}
-		
-		return dados;
 	}
 	
 	public void mostrarMensagemServidor(String msg){
@@ -525,49 +558,6 @@ public class Principal extends JFrame implements IServer{
 	
 	public void mostrarMensagemCliente(String msg){
 		txtPaneLogCliente.setText(txtPaneLogCliente.getText() +"\n" + msg);
-	}
-	
-	public void atualizarMapArquivos(){
-		List<Arquivo> arquivos = new ArrayList<>();
-		arquivos = ListarDiretoriosArquivos.listar(new File("Share\\Uploads"));
-		
-		try {
-			if(rbNome.isSelected()){
-				mapArquivos = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo(txtPesq.getText(), TipoFiltro.NOME, "");
-			}else{
-				if(rbExtensao.isSelected()){
-					mapArquivos = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.EXTENSAO, txtPesq.getText());
-				}else{
-					if(rbTamMax.isSelected()){
-						mapArquivos = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.TAMANHO_MAX, txtPesq.getText());
-					}else{
-						mapArquivos = (HashMap<Cliente, List<Arquivo>>) server.procurarArquivo("", TipoFiltro.TAMANHO_MIN, txtPesq.getText());
-					}
-				}
-			}
-//			server.procurarArquivo("texto", TipoFiltro.NOME, "txt");
-			
-//			Set<Cliente> chaves = mapArquivos.keySet();
-//			
-//			for (Cliente cliente : chaves) {
-//				if(cliente != null){
-//					List<Arquivo> arquivos1 = (ArrayList<Arquivo>) mapArquivos.get(cliente);
-//					for (Arquivo arquivo : arquivos1) {
-//						byte[] dados = null; 
-//						dados = server.baixarArquivo(cliente, arquivo);
-//						
-//						LeituraEscritaDeArquivos le = new LeituraEscritaDeArquivos();
-//						le.escreva(new File("C:\\eclipse neon\\Workspace\\Projeto Compartilha Arquivos\\Share\\Downloads\\"
-//											+arquivo.getNome()), dados);
-//					}
-//					mapArquivos.put(cliente, arquivos1);
-//				}			
-//			}
-			
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	public void efetuarDownload(){
@@ -587,42 +577,19 @@ public class Principal extends JFrame implements IServer{
 		try {
 			Registry registry = LocateRegistry.getRegistry(c.getIp(),c.getPorta());
 			IServer servico = (IServer) registry.lookup(IServer.NOME_SERVICO);
-			dados = servico.baixarArquivo(c, arq);
+			dados = servico.baixarArquivo(cLocal, arq);
 			
 			LeituraEscritaDeArquivos le = new LeituraEscritaDeArquivos();
 			le.escreva(new File("C:\\eclipse neon\\Workspace\\Projeto Compartilha Arquivos\\Share\\Downloads\\"
 								+arq.getNome() + "." + arq.getExtensao()), dados);
 			
+			mostrarMensagemCliente("Download efetuado com sucesso.");
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NotBoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-//		Set<Cliente> chaves = mapArquivos.keySet();
-//		
-//		for (Cliente cliente : chaves) {
-//			if(cliente != null){
-//				List<Arquivo> arquivos1 = (ArrayList<Arquivo>) mapArquivos.get(cliente);
-//				for (Arquivo arquivo : arquivos1) {
-//					byte[] dados = null; 
-//					
-//					try {
-//						dados = server.baixarArquivo(cliente, arquivo);
-//					} catch (RemoteException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//					
-//					LeituraEscritaDeArquivos le = new LeituraEscritaDeArquivos();
-//					le.escreva(new File("C:\\eclipse neon\\Workspace\\Projeto Compartilha Arquivos\\Share\\Downloads\\"
-//										+arquivo.getNome()), dados);
-//				}
-//				mapArquivos.put(cliente, arquivos1);
-//			}			
-//		}
 	}
 
 }

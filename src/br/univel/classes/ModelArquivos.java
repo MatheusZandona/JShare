@@ -58,7 +58,7 @@ public class ModelArquivos extends AbstractTableModel{
 
 	@Override
 	public int getColumnCount() {
-		return matrix[0].length;
+		return 11;
 	}
 
 	@Override
