@@ -42,7 +42,7 @@ public class ModelArquivos extends AbstractTableModel{
 				matrix[cont][0] = cli.getId();
 				matrix[cont][1] = cli.getNome();
 				matrix[cont][2] = cli.getIp();
-				matrix[cont][3] = cli.getPorta();
+				matrix[cont][3] = cli.getPorta();		
 				matrix[cont][4] = arq.getId();
 				matrix[cont][5] = arq.getNome();
 				matrix[cont][6] = arq.getExtensao();
@@ -50,7 +50,6 @@ public class ModelArquivos extends AbstractTableModel{
 				matrix[cont][8] = arq.getPath();
 				matrix[cont][9] = arq.getTamanho();
 				matrix[cont][10] = arq.getDataHoraModificacao();
-				
 				cont++;
 			}
 		}
@@ -103,6 +102,7 @@ public class ModelArquivos extends AbstractTableModel{
 	
 	public Arquivo getArquivo(int linha){
 		Arquivo arq = new Arquivo();
+		
 		arq.setId((long) matrix[linha][4]);
 		arq.setNome((String) matrix[linha][5]);
 		arq.setExtensao((String) matrix[linha][6]);

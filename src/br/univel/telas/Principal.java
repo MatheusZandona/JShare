@@ -54,6 +54,8 @@ public class Principal extends JFrame implements IServer{
 	public static IServer serverCli ;
 	public Cliente cLocal;
 	
+	private boolean servidorOnline = false;
+	
 	private JTextField txtPorta;
 	private JTextField txtIp;
 	private JTable tableArquivos;
@@ -67,6 +69,7 @@ public class Principal extends JFrame implements IServer{
 	JButton btnConectaServidor;
 	JButton btnDesconectar;
 	JButton btnPesq;
+	JButton btnIniciarServidor;
 	
 	public Principal() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -131,8 +134,10 @@ public class Principal extends JFrame implements IServer{
 		btnConectaServidor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
+					if(!servidorOnline){
+						iniciarServidor();
+					}
 					conectarServidor(txtIp.getText(), Integer.parseInt(txtPorta.getText()));
-					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -187,7 +192,7 @@ public class Principal extends JFrame implements IServer{
 		gbl_panelServidor.rowWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panelServidor.setLayout(gbl_panelServidor);
 		
-		JButton btnIniciarServidor = new JButton("Iniciar Servidor");
+		btnIniciarServidor = new JButton("Iniciar Servidor");
 		btnIniciarServidor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				iniciarServidor();
@@ -414,6 +419,9 @@ public class Principal extends JFrame implements IServer{
 			registry.rebind(IServer.NOME_SERVICO, servico);
 			mostrarMensagemServidor("Aguardando Cliente se conectar...");
 			
+			servidorOnline = true;
+			
+			btnIniciarServidor.setEnabled(false);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -455,6 +463,7 @@ public class Principal extends JFrame implements IServer{
 	public void publicarListaArquivos(Cliente c, List<Arquivo> lista) throws RemoteException {
 		mapArquivos.put(c, lista);
 		mostrarMensagemServidor("Cliente "+c.getIp() + " - " + c.getNome() + " publicou arquivo(s).");
+		atualizaTable(mapArquivos);
 	}
 
 	@Override
@@ -522,7 +531,7 @@ public class Principal extends JFrame implements IServer{
 		LeituraEscritaDeArquivos le = new LeituraEscritaDeArquivos();
 		dados = le.leia(new File(arq.getPath()));
 		
-		mostrarMensagemServidor("Cliente "+cLocal.getIp() + " - " + cLocal.getNome() + " fez download do arquivo " 
+		mostrarMensagemServidor("Cliente "+cli.getIp() + " - " + cli.getNome() + " fez download do arquivo " 
 				+ arq.getNome() + "." + arq.getExtensao());
 		
 		return dados;
@@ -538,6 +547,8 @@ public class Principal extends JFrame implements IServer{
 			btnConectaServidor.setEnabled(true);
 			btnPesq.setEnabled(false);
 			atualizaTable(mapArquivos);
+			
+			servidorOnline = false;
 		}else{
 			mostrarMensagemServidor("Impossivel desconctar cliente null.");
 			mostrarMensagemCliente("Não foi possivel se desconectar.");
@@ -563,14 +574,12 @@ public class Principal extends JFrame implements IServer{
 	public void efetuarDownload(){
 		
 		int linha = tableArquivos.getSelectedRow();
-		ModelArquivos model = new ModelArquivos(mapArquivos);
 		
 		Arquivo arq = new Arquivo();
-		arq = model.getArquivo(linha);
-		System.out.println(arq.getExtensao());
+		arq = ((ModelArquivos) tableArquivos.getModel()).getArquivo(linha);
 		
 		Cliente c = new Cliente();
-		c = model.getCliente(linha);
+		c = ((ModelArquivos) tableArquivos.getModel()).getCliente(linha);
 		
 		byte[] dados = null;
 		
@@ -580,7 +589,7 @@ public class Principal extends JFrame implements IServer{
 			dados = servico.baixarArquivo(cLocal, arq);
 			
 			LeituraEscritaDeArquivos le = new LeituraEscritaDeArquivos();
-			le.escreva(new File("C:\\eclipse neon\\Workspace\\Projeto Compartilha Arquivos\\Share\\Downloads\\"
+			le.escreva(new File("Share\\Downloads\\"
 								+arq.getNome() + "." + arq.getExtensao()), dados);
 			
 			mostrarMensagemCliente("Download efetuado com sucesso.");

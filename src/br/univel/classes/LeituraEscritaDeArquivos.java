@@ -32,7 +32,6 @@ public class LeituraEscritaDeArquivos {
 
 	public void escreva(File arq, byte[] dados) {
 		try {
-			System.out.println(arq.getPath());
 			Files.write(Paths.get(arq.getPath()), dados, StandardOpenOption.CREATE);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
