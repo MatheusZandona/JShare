@@ -128,7 +128,7 @@ public class Principal extends JFrame implements IServer{
 		gbc_txtPorta.gridx = 1;
 		gbc_txtPorta.gridy = 1;
 		panelCliente.add(txtPorta, gbc_txtPorta);
-		txtPorta.setColumns(10);
+		txtPorta.setColumns(10); 
 		
 		btnConectaServidor = new JButton("Conectar Servidor");
 		btnConectaServidor.addActionListener(new ActionListener() {
