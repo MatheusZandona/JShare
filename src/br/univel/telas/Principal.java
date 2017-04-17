@@ -119,7 +119,7 @@ public class Principal extends JFrame implements IServer{
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 1;
 		panelCliente.add(lblNewLabel, gbc_lblNewLabel);
-		
+		 
 		txtPorta = new JTextField();
 		txtPorta.setText("1818");
 		GridBagConstraints gbc_txtPorta = new GridBagConstraints();
@@ -402,7 +402,7 @@ public class Principal extends JFrame implements IServer{
 	public void executar() {
 		atualizaTable(mapArquivos);
 		
-	}
+	} 
 
 	public void iniciarServidor() {
 		// Servidor =====================================================================

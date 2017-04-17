@@ -13,7 +13,7 @@ public class ListarDiretoriosArquivos {
 		//File dirStart = new File("." + File.separatorChar);
 
 		List<Arquivo> listaArquivos = new ArrayList<>();
-		
+		 
 		for (File file : dirStart.listFiles()) {
 			if (file.isFile()) {
 				Arquivo arq = new Arquivo();

@@ -9,7 +9,7 @@ public class LerIp {
 
 		InetAddress IP = null;
 
-		try {
+		try { 
 			IP = InetAddress.getLocalHost();
 			String IPString = IP.getHostAddress();
 		} catch (UnknownHostException e) {
